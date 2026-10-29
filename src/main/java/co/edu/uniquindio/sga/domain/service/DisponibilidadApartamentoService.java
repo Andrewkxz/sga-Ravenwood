@@ -6,32 +6,28 @@ import co.edu.uniquindio.sga.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.sga.domain.repository.BloqueoRepository;
 import co.edu.uniquindio.sga.domain.repository.ReservaRepository;
 import co.edu.uniquindio.sga.domain.valueobject.Estancia;
-import co.edu.uniquindio.sga.domain.valueobject.IdentificacionSolar;
+import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 import co.edu.uniquindio.sga.domain.valueobject.Periodo;
 import co.edu.uniquindio.sga.domain.valueobject.TiempoPreparacion;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-/**
- * RN-01 (sin solapamiento con reservas activas, sin importar el canal), RN-07 (sin bloqueo
- * vigente), RN-12 (las reservas no activas no cuentan) y RN-20 (tiempo de preparación entre
- * la salida de un grupo y la entrada del siguiente).
- */
-public class DisponibilidadsolarService {
+/** Servicio de dominio (Guía 05) */
+public class DisponibilidadApartamentoService {
 
     private final ReservaRepository reservaRepository;
     private final BloqueoRepository bloqueoRepository;
 
-    public DisponibilidadsolarService(ReservaRepository reservaRepository, BloqueoRepository bloqueoRepository) {
+    public DisponibilidadApartamentoService(ReservaRepository reservaRepository, BloqueoRepository bloqueoRepository) {
         this.reservaRepository = reservaRepository;
         this.bloqueoRepository = bloqueoRepository;
     }
 
-    public boolean estaDisponible(IdentificacionSolar solar, Estancia estancia, TiempoPreparacion preparacion) {
+    public boolean estaDisponible(IdentificacionApartamento apartamento, Estancia estancia, TiempoPreparacion preparacion) {
         Periodo periodo = new Periodo(estancia.fechaEntrada(), estancia.fechaSalida());
 
-        List<Reserva> activas = reservaRepository.buscarActivasPorSolar(solar, periodo);
+        List<Reserva> activas = reservaRepository.buscarActivasPorApartamento(apartamento, periodo);
         for (Reserva otra : activas) {
             // RN-12: una reserva que dejó de estar activa no ocupa noches
             if (!otra.estaActiva()) {
@@ -48,7 +44,7 @@ public class DisponibilidadsolarService {
         }
 
         // RN-07
-        List<Bloqueo> bloqueos = bloqueoRepository.buscarVigentesPorsolar(solar, periodo);
+        List<Bloqueo> bloqueos = bloqueoRepository.buscarVigentesPorApartamento(apartamento, periodo);
         for (Bloqueo bloqueo : bloqueos) {
             if (bloqueo.afecta(estancia)) {
                 return false;
@@ -58,10 +54,10 @@ public class DisponibilidadsolarService {
         return true;
     }
 
-    public void verificarDisponibilidad(IdentificacionSolar solar, Estancia estancia, TiempoPreparacion preparacion) {
-        if (!estaDisponible(solar, estancia, preparacion)) {
+    public void verificarDisponibilidad(IdentificacionApartamento apartamento, Estancia estancia, TiempoPreparacion preparacion) {
+        if (!estaDisponible(apartamento, estancia, preparacion)) {
             throw new ReglaDominioException(
-                    "El solar no está disponible para la estancia solicitada.");
+                    "El apartamento no está disponible para la estancia solicitada.");
         }
     }
 

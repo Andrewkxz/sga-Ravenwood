@@ -6,11 +6,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Intervalo cerrado en la entrada y abierto en la salida: [entrada, salida).
- * Distinto de {@link Periodo}, que es cerrado en ambos extremos. Confundirlos
- * produce errores de una noche en el cálculo de disponibilidad y de valor.
- */
+/** Objeto de valor (Guía 04) */
 public record Estancia(LocalDate fechaEntrada, LocalDate fechaSalida) {
 
     public Estancia {
@@ -32,7 +28,7 @@ public record Estancia(LocalDate fechaEntrada, LocalDate fechaSalida) {
         return !noche.isBefore(fechaEntrada) && noche.isBefore(fechaSalida);
     }
 
-    /** RN-01: un solar no puede tener dos reservas activas solapadas. */
+    /** RN-01: un apartamento no puede tener dos reservas activas solapadas. */
     public boolean seSolapaCon(Estancia otra) {
         return fechaEntrada.isBefore(otra.fechaSalida) && otra.fechaEntrada.isBefore(fechaSalida);
     }

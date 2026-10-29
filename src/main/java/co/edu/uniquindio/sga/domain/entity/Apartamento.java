@@ -3,7 +3,7 @@ package co.edu.uniquindio.sga.domain.entity;
 import co.edu.uniquindio.sga.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.sga.domain.valueobject.EstadoOperativo;
 import co.edu.uniquindio.sga.domain.valueobject.IdTemporada;
-import co.edu.uniquindio.sga.domain.valueobject.IdentificacionSolar;
+import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 import co.edu.uniquindio.sga.domain.valueobject.Tarifa;
 
 import java.util.ArrayList;
@@ -11,12 +11,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-/**
- * Raíz del agregado Solar.
- */
-public class Solar {
+/** Entidad Apartamento (Guía 04), raíz del agregado Apartamento (Guía 05) */
+public class Apartamento {
 
-    private final IdentificacionSolar identificacion;
+    private final IdentificacionApartamento identificacion;
     private String nombre;
     private int dormitorios;
     private int capacidad;
@@ -25,18 +23,18 @@ public class Solar {
     // RN de oro #9: colección interna siempre de solo lectura; toda modificación reemplaza la referencia
     private List<Tarifa> tarifas = List.of();
 
-    public Solar(IdentificacionSolar identificacion, String nombre, int dormitorios, int capacidad) {
+    public Apartamento(IdentificacionApartamento identificacion, String nombre, int dormitorios, int capacidad) {
         if (identificacion == null) {
-            throw new ReglaDominioException("El solar debe tener una identificación.");
+            throw new ReglaDominioException("El apartamento debe tener una identificación.");
         }
         if (nombre == null || nombre.isBlank()) {
-            throw new ReglaDominioException("El solar debe tener un nombre.");
+            throw new ReglaDominioException("El apartamento debe tener un nombre.");
         }
         if (dormitorios < 1) {
-            throw new ReglaDominioException("El solar debe tener al menos un dormitorio.");
+            throw new ReglaDominioException("El apartamento debe tener al menos un dormitorio.");
         }
         if (capacidad < 1) {
-            throw new ReglaDominioException("El solar debe tener capacidad para al menos un ocupante.");
+            throw new ReglaDominioException("El apartamento debe tener capacidad para al menos un ocupante.");
         }
         this.identificacion = identificacion;
         this.nombre = nombre;
@@ -51,12 +49,19 @@ public class Solar {
         return totalOcupantes <= capacidad;
     }
 
+    /** 7.5 condición 3: solo un apartamento activo admite reservas nuevas. */
+    public void verificarQueAceptaReservas() {
+        if (!activo) {
+            throw new ReglaDominioException("El apartamento no está activo y no admite reservas.");
+        }
+    }
+
     /** RN-11: solo puede recibir un grupo si está activo y en estado operativo PREPARADO. */
     public boolean puedeRecibirGrupo() {
         return activo && estadoOperativo.permiteRegistro();
     }
 
-    /** RN-05: tarifa vigente del solar para una temporada dada. */
+    /** RN-05: tarifa vigente del apartamento para una temporada dada. */
     public Optional<Tarifa> tarifaEn(IdTemporada temporada) {
         return tarifas.stream()
                 .filter(tarifa -> tarifa.temporada().equals(temporada))
@@ -75,28 +80,28 @@ public class Solar {
         this.tarifas = List.copyOf(actualizadas);
     }
 
-    // F-09: solo se ocupa un solar que está PREPARADO
+    // F-09: solo se ocupa un apartamento que está PREPARADO
     public void marcarOcupado() {
         if (estadoOperativo != EstadoOperativo.PREPARADO) {
-            throw new ReglaDominioException("Solo se puede ocupar un solar que está PREPARADO.");
+            throw new ReglaDominioException("Solo se puede ocupar un apartamento que está PREPARADO.");
         }
         estadoOperativo = EstadoOperativo.OCUPADO;
     }
 
-    // F-09: tras la salida del grupo, el solar OCUPADO queda pendiente de preparación
+    // F-09: tras la salida del grupo, el apartamento OCUPADO queda pendiente de preparación
     public void marcarPendientePreparacion() {
         if (estadoOperativo != EstadoOperativo.OCUPADO) {
             throw new ReglaDominioException(
-                    "Solo se puede marcar pendiente de preparación un solar OCUPADO.");
+                    "Solo se puede marcar pendiente de preparación un apartamento OCUPADO.");
         }
         estadoOperativo = EstadoOperativo.PENDIENTE_PREPARACION;
     }
 
-    // F-09: la preparación solo inicia si el solar estaba pendiente de ella
+    // F-09: la preparación solo inicia si el apartamento estaba pendiente de ella
     public void marcarEnPreparacion() {
         if (estadoOperativo != EstadoOperativo.PENDIENTE_PREPARACION) {
             throw new ReglaDominioException(
-                    "Solo se puede iniciar la preparación de un solar PENDIENTE_PREPARACION.");
+                    "Solo se puede iniciar la preparación de un apartamento PENDIENTE_PREPARACION.");
         }
         estadoOperativo = EstadoOperativo.EN_PREPARACION;
     }
@@ -105,7 +110,7 @@ public class Solar {
     public void marcarPreparado() {
         if (estadoOperativo != EstadoOperativo.EN_PREPARACION && estadoOperativo != EstadoOperativo.FUERA_DE_SERVICIO) {
             throw new ReglaDominioException(
-                    "Solo se puede preparar un solar que está EN_PREPARACION o FUERA_DE_SERVICIO.");
+                    "Solo se puede preparar un apartamento que está EN_PREPARACION o FUERA_DE_SERVICIO.");
         }
         estadoOperativo = EstadoOperativo.PREPARADO;
     }
@@ -113,17 +118,17 @@ public class Solar {
     // F-09: se puede declarar fuera de servicio desde cualquier estado, salvo que ya lo esté
     public void declararFueraDeServicio() {
         if (estadoOperativo == EstadoOperativo.FUERA_DE_SERVICIO) {
-            throw new ReglaDominioException("El solar ya está fuera de servicio.");
+            throw new ReglaDominioException("El apartamento ya está fuera de servicio.");
         }
         estadoOperativo = EstadoOperativo.FUERA_DE_SERVICIO;
     }
 
-    // La eliminación de solars es lógica, nunca física
+    // La eliminación de apartamentos es lógica, nunca física
     public void desactivar() {
         activo = false;
     }
 
-    public IdentificacionSolar getIdentificacion() {
+    public IdentificacionApartamento getIdentificacion() {
         return identificacion;
     }
 
@@ -156,7 +161,7 @@ public class Solar {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Solar that)) return false;
+        if (!(o instanceof Apartamento that)) return false;
         return Objects.equals(identificacion, that.identificacion);
     }
 

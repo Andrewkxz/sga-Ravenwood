@@ -3,30 +3,28 @@ package co.edu.uniquindio.sga.domain.entity;
 import co.edu.uniquindio.sga.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.sga.domain.valueobject.GravedadNovedad;
 import co.edu.uniquindio.sga.domain.valueobject.IdNovedad;
-import co.edu.uniquindio.sga.domain.valueobject.IdentificacionSolar;
+import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-/**
- * Raíz del agregado Novedad.
- */
+/** Entidad (Guía 05) */
 public class Novedad {
 
     private final IdNovedad id;
-    private final IdentificacionSolar solar;
+    private final IdentificacionApartamento apartamento;
     private String descripcion;
     private GravedadNovedad gravedad;
     private final LocalDate fechaReporte;
     private boolean atendida;
 
-    public Novedad(IdNovedad id, IdentificacionSolar solar, String descripcion,
+    public Novedad(IdNovedad id, IdentificacionApartamento apartamento, String descripcion,
                     GravedadNovedad gravedad, LocalDate fechaReporte) {
         if (id == null) {
             throw new ReglaDominioException("La novedad debe tener un identificador.");
         }
-        if (solar == null) {
-            throw new ReglaDominioException("La novedad debe indicar el solar afectado.");
+        if (apartamento == null) {
+            throw new ReglaDominioException("La novedad debe indicar el apartamento afectado.");
         }
         if (descripcion == null || descripcion.isBlank()) {
             throw new ReglaDominioException("La novedad debe tener una descripción.");
@@ -38,7 +36,7 @@ public class Novedad {
             throw new ReglaDominioException("La novedad debe indicar la fecha de reporte.");
         }
         this.id = id;
-        this.solar = solar;
+        this.apartamento = apartamento;
         this.descripcion = descripcion;
         this.gravedad = gravedad;
         this.fechaReporte = fechaReporte;
@@ -53,8 +51,8 @@ public class Novedad {
         return id;
     }
 
-    public IdentificacionSolar getSolar() {
-        return solar;
+    public IdentificacionApartamento getApartamento() {
+        return apartamento;
     }
 
     public String getDescripcion() {

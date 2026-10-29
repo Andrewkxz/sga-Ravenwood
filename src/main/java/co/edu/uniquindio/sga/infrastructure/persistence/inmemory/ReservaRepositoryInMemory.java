@@ -1,0 +1,48 @@
+package co.edu.uniquindio.sga.infrastructure.persistence.inmemory;
+
+import co.edu.uniquindio.sga.domain.entity.Reserva;
+import co.edu.uniquindio.sga.domain.repository.ReservaRepository;
+import co.edu.uniquindio.sga.domain.valueobject.CodigoReserva;
+import co.edu.uniquindio.sga.domain.valueobject.EstadoReserva;
+import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
+import co.edu.uniquindio.sga.domain.valueobject.Periodo;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.stereotype.Repository;
+
+/** Adaptador en memoria del puerto (Guía 06), bean de Spring (Guía 09) */
+@Repository
+public class ReservaRepositoryInMemory implements ReservaRepository {
+
+    private final HashMap<CodigoReserva, Reserva> reservas = new HashMap<>();
+
+    @Override
+    public List<Reserva> buscarActivasPorApartamento(IdentificacionApartamento apartamento, Periodo periodo) {
+        return reservas.values()
+                .stream()
+                .filter(reserva -> reserva.getApartamento().equals(apartamento))
+                .filter(reserva -> reserva.getEstado().esActiva())
+                .toList();
+    }
+
+    @Override
+    public Optional<Reserva> obtenerPorCodigo(CodigoReserva codigo) {
+        return Optional.ofNullable(reservas.get(codigo));
+    }
+
+    @Override
+    public List<Reserva> buscarPorEstado(EstadoReserva estado) {
+        return reservas.values()
+                .stream()
+                .filter(reserva -> reserva.getEstado() == estado)
+                .toList();
+    }
+
+    @Override
+    public void guardar(Reserva reserva) {
+        reservas.put(reserva.getCodigo(), reserva);
+    }
+}

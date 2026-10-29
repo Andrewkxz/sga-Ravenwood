@@ -4,11 +4,7 @@ import co.edu.uniquindio.sga.domain.exception.ReglaDominioException;
 
 import java.time.LocalDate;
 
-/**
- * Rango cerrado en ambos extremos ([desde, hasta]), usado por {@code Temporada} y
- * {@code Bloqueo}. Distinto de {@link Estancia}, que es semiabierto: confundirlos
- * produce errores de una noche en el cálculo de disponibilidad y de valor.
- */
+/** Objeto de valor (Guía 05) */
 public record Periodo(LocalDate desde, LocalDate hasta) {
 
     public Periodo {
