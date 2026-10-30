@@ -4,7 +4,9 @@ import co.edu.uniquindio.sga.domain.entity.Apartamento;
 import co.edu.uniquindio.sga.domain.repository.ApartamentoRepository;
 import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -18,6 +20,11 @@ public class ApartamentoRepositoryInMemory implements ApartamentoRepository {
     @Override
     public Optional<Apartamento> obtenerPorIdentificacion(IdentificacionApartamento identificacion) {
         return Optional.ofNullable(apartamentos.get(identificacion));
+    }
+
+    @Override
+    public List<Apartamento> obtenerTodos() {
+        return new ArrayList<>(apartamentos.values());
     }
 
     @Override
