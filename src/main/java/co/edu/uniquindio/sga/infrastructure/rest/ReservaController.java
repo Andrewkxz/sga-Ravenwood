@@ -108,14 +108,17 @@ public class ReservaController {
         return ResponseEntity.ok(mapper.aDetalle(reserva));
     }
 
-    /** GET -> /api/reservas?estado=PENDIENTE */
+    /** GET -> /api/reservas?estado=PENDIENTE&page=0&size=10 */
     @GetMapping
-    @Operation(summary = "Listar reservas por estado")
+    @Operation(summary = "Listar reservas por estado con paginación")
     @ApiResponse(responseCode = "200", description = "Reservas en el estado indicado")
     @ApiResponse(responseCode = "400", description = "Estado inexistente")
-    public ResponseEntity<List<ReservaResumenResponse>> listarReservas(@RequestParam EstadoReserva estado) {
+    public ResponseEntity<List<ReservaResumenResponse>> listarReservas(
+            @RequestParam EstadoReserva estado,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
 
-        List<Reserva> reservas = consultarReservasPorEstadoUseCase.ejecutar(estado);
+        List<Reserva> reservas = consultarReservasPorEstadoUseCase.ejecutarPaginado(estado, page, size);
         return ResponseEntity.ok(mapper.aResumenes(reservas));
     }
 

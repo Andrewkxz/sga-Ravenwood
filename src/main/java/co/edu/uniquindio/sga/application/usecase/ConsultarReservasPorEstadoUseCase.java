@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// La paginación de 10 por página (7.5, 12.4) llega con la Guía 11
 /** Caso de uso (Guía 06), servicio de Spring con transacción (Guía 09) */
 @Service
 public class ConsultarReservasPorEstadoUseCase {
@@ -23,5 +22,13 @@ public class ConsultarReservasPorEstadoUseCase {
     @Transactional(readOnly = true)
     public List<Reserva> ejecutar(EstadoReserva estado) {
         return reservaRepository.buscarPorEstado(estado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reserva> ejecutarPaginado(EstadoReserva estado, int pagina, int tamano) {
+        List<Reserva> todas = reservaRepository.buscarPorEstado(estado);
+        int desde = Math.min(pagina * tamano, todas.size());
+        int hasta = Math.min(desde + tamano, todas.size());
+        return todas.subList(desde, hasta);
     }
 }
