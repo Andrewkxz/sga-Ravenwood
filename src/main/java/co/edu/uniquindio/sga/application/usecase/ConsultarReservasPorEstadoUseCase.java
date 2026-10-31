@@ -27,6 +27,9 @@ public class ConsultarReservasPorEstadoUseCase {
     @Transactional(readOnly = true)
     public List<Reserva> ejecutarPaginado(EstadoReserva estado, int pagina, int tamano) {
         List<Reserva> todas = reservaRepository.buscarPorEstado(estado);
+        if (todas.isEmpty()) {
+            return List.of();
+        }
         int desde = Math.min(pagina * tamano, todas.size());
         int hasta = Math.min(desde + tamano, todas.size());
         return todas.subList(desde, hasta);

@@ -11,6 +11,8 @@ import co.edu.uniquindio.sga.infrastructure.persistence.jpa.mapper.ReservaPersis
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Arrays;
@@ -52,6 +54,15 @@ public class ReservaJpaRepository implements ReservaRepository {
     @Transactional(readOnly = true)
     public List<Reserva> buscarPorEstado(EstadoReserva estado) {
         return dataRepository.findByEstado(estado)
+                .stream()
+                .map(mapper::toReservaDomain)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int pagina, int tamano) {
+        Pageable pageable = PageRequest.of(pagina, tamano);
+        return dataRepository.findByEstado(estado, pageable)
                 .stream()
                 .map(mapper::toReservaDomain)
                 .toList();
