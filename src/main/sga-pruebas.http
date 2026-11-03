@@ -1,0 +1,130 @@
+### ==========================================
+### COLECCIÓN DE PRUEBAS - PROYECTO SGA (SGA-RAVENWOOD)
+### ==========================================
+
+@baseUrl = http://localhost:8080/api
+
+### ------------------------------------------
+### 1. MÓDULO DE APARTAMENTOS Y DISPONIBILIDAD
+### ------------------------------------------
+
+### Buscar apartamentos disponibles por fechas y capacidad (Con paginación tamaño 10)
+GET {{baseUrl}}/apartamentos/disponibles?fechaInicio=2026-06-01&fechaFin=2026-06-05&capacidad=2&page=0&size=10
+Accept: application/json
+
+
+### ------------------------------------------
+### 2. MÓDULO DE COTIZACIONES
+### ------------------------------------------
+
+### Cotizar una estancia en un apartamento
+POST {{baseUrl}}/cotizaciones
+Content-Type: application/json
+
+{
+  "identificacionApartamento": "APTO-101",
+  "fechaInicio": "2026-06-01",
+  "fechaFin": "2026-06-05",
+  "cantidadHuespedes": 2
+}
+
+
+### ------------------------------------------
+### 3. MÓDULO DE RESERVAS (FLUJO COMPLETO)
+### ------------------------------------------
+
+### 3.1 Crear una reserva exitosa (Debe retornar 201 Created con Header Location)
+POST {{baseUrl}}/reservas
+Content-Type: application/json
+
+{
+  "identificacionApartamento": "APTO-101",
+  "fechaInicio": "2026-06-01",
+  "fechaFin": "2026-06-05",
+  "horaEstimadaLlegada": "14:00:00",
+  "titular": {
+    "nombre": "Carlos Andrés Gómez",
+    "tipoDocumento": "CEDULA",
+    "numeroDocumento": "1094888777",
+    "correo": "carlos.gomez@uniquindio.edu.co",
+    "telefono": "3104445566"
+  },
+  "ocupantes": [
+    {
+      "nombre": "Laura Sofía Gómez",
+      "tipoDocumento": "CEDULA",
+      "numeroDocumento": "1094888888"
+    }
+  ],
+  "cantidadMascotas": 0,
+  "canalOrigen": "DIRECTO"
+}
+
+### 3.2 Intentar crear reserva con fechas solapadas (Debe retornar 409 Conflict - Regla de Negocio)
+POST {{baseUrl}}/reservas
+Content-Type: application/json
+
+{
+  "identificacionApartamento": "APTO-101",
+  "fechaInicio": "2026-06-02",
+  "fechaFin": "2026-06-04",
+  "horaEstimadaLlegada": "15:00:00",
+  "titular": {
+    "nombre": "Maria Fernanda",
+    "tipoDocumento": "CEDULA",
+    "numeroDocumento": "987654321",
+    "correo": "maria@correo.com",
+    "telefono": "3201112233"
+  },
+  "ocupantes": [],
+  "cantidadMascotas": 0,
+  "canalOrigen": "DIRECTO"
+}
+
+
+### 3.3 Consultar detalle de una reserva por código (Reemplaza RES-... por un código real generado)
+GET {{baseUrl}}/reservas/RES-2026-00001
+Accept: application/json
+
+
+### 3.4 Listar reservas por estado con Paginación Obligatoria de 10 por página
+GET {{baseUrl}}/reservas?estado=PENDIENTE&page=0&size=10
+Accept: application/json
+
+
+### 3.5 Confirmar una reserva
+PUT {{baseUrl}}/reservas/RES-2026-00001/confirmar
+Content-Type: application/json
+
+
+### 3.6 Registrar llegada (Check-in)
+PUT {{baseUrl}}/reservas/RES-2026-00001/registrar-llegada
+Content-Type: application/json
+
+
+### 3.7 Registrar salida (Check-out)
+PUT {{baseUrl}}/reservas/RES-2026-00001/registrar-salida
+Content-Type: application/json
+{
+  "autorizacionCierre": "SALDO_CERO"
+}
+
+
+### ------------------------------------------
+### 4. PRUEBAS DE EXCEPCIONES Y ERRORES
+### ------------------------------------------
+
+### 4.1 Buscar una reserva que no existe (Debe retornar 404 Not Found)
+GET {{baseUrl}}/reservas/RES-9999-99999
+Accept: application/json
+
+
+### 4.2 Enviar DTO con datos incompletos / inválidos (Debe retornar 400 Bad Request por Bean Validation)
+POST {{baseUrl}}/reservas
+Content-Type: application/json
+
+{
+  "identificacionApartamento": "",
+  "fechaInicio": "2026-06-01",
+  "fechaFin": "2026-05-01"
+}

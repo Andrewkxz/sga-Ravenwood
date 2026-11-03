@@ -26,6 +26,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,19 +41,17 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /** Controller REST como adaptador (Guía 08, Parte 1) */
 @RestController
 @RequestMapping("/api/reservas")
 @RequiredArgsConstructor  /** Genera el constructor con todos los campos final */
-/** OpenAPI / Swagger UI (Guía 08, Parte 6): @Tag, @Operation y @ApiResponse documentan cada endpoint */
 @Tag(name = "Reservas", description = "Ciclo de vida del agregado Reserva")
 public class ReservaController {
 
-    /** Casos de Uso - Dependencias - Mapper */
     private final CrearReservaUseCase crearReservaUseCase;
     private final ConsultarReservaUseCase consultarReservaUseCase;
     private final ConsultarReservasPorEstadoUseCase consultarReservasPorEstadoUseCase;
@@ -62,22 +63,16 @@ public class ReservaController {
     private final ModificarReservaUseCase modificarReservaUseCase;
     private final ReservaMapper mapper;
 
-    /** ------ Post - CREATE --------- */
-
     /** POST -> /api/reservas */
     @PostMapping
     @Operation(summary = "Crear una reserva",
-               description = "Crea la reserva en estado PENDIENTE, congela valor y política (RN-22) y abre su folio (F-08)")
+                description = "Crea la reserva en estado PENDIENTE, congela valor y política (RN-22) y abre su folio (F-08)")
     @ApiResponse(responseCode = "201", description = "Reserva creada")
     @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
     @ApiResponse(responseCode = "404", description = "El apartamento no existe")
     @ApiResponse(responseCode = "409", description = "Una regla del negocio lo impide (RN-01, RN-02, RN-03, RN-04)")
     public ResponseEntity<ReservaDetalleResponse> crearReserva(@Valid @RequestBody CrearReservaRequest request) {
 
-        /**
-         * 1. Convertir DTO a tipos del dominio y delegar al caso de uso.
-         * La fecha actual la pone el servidor, nunca el cliente.
-         */
         Reserva reserva = crearReservaUseCase.ejecutar(
                 new IdentificacionApartamento(request.identificacionApartamento()),
                 mapper.aEstancia(request),
@@ -89,13 +84,8 @@ public class ReservaController {
                 LocalDate.now()
         );
 
-        /** 2. Mapear de dominio a DTO */
         ReservaDetalleResponse response = mapper.aDetalle(reserva);
 
-        /**
-         * 3. 201 Created + header Location con la URL del recurso nuevo
-         * http://localhost:8080/api/reservas/RES-2026-00001
-         */
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{codigo}")
@@ -105,21 +95,17 @@ public class ReservaController {
         return ResponseEntity.created(location).body(response);
     }
 
-    /** ------ Get - READ --------- */
-
     /** GET -> /api/reservas/{codigo} */
     @GetMapping("/{codigo}")
     @Operation(summary = "Consultar una reserva")
     @ApiResponse(responseCode = "200", description = "Detalle de la reserva")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
     public ResponseEntity<ReservaDetalleResponse> obtenerReserva(@PathVariable String codigo) {
-
-        /** El String de la URL se convierte a tipo del dominio ANTES del caso de uso */
         Reserva reserva = consultarReservaUseCase.ejecutar(new CodigoReserva(codigo));
         return ResponseEntity.ok(mapper.aDetalle(reserva));
     }
 
-    /** GET -> /api/reservas?estado=PENDIENTE&page=0&size=10 */
+/** GET -> /api/reservas?estado=PENDIENTE&page=0&size=10 */
     @GetMapping
     @Operation(summary = "Listar reservas por estado con paginación")
     @ApiResponse(responseCode = "200", description = "Reservas en el estado indicado")
@@ -133,15 +119,10 @@ public class ReservaController {
         return ResponseEntity.ok(mapper.aResumenes(reservas));
     }
 
-    /**
-     * ------ Put - OPERACIONES DE NEGOCIO ---------
-     * El endpoint no recibe el estado final: el estado al que pasa lo decide el agregado Reserva
-     */
-
     /** PUT -> api/reservas/{codigo} */
     @PutMapping("/{codigo}")
     @Operation(summary = "Modificar reserva activa",
-               description = "Reemplaza fechas o cupo revalidando disponibilidad y recalculando tarifas (RN-14)")
+                description = "Reemplaza fechas o cupo revalidando disponibilidad y recalculando tarifas (RN-14)")
     @ApiResponse(responseCode = "200", description = "Reserva modificada con éxito")
     @ApiResponse(responseCode = "400", description = "Ajuste rechazado por violar reglas de dominio")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
@@ -164,12 +145,11 @@ public class ReservaController {
     /** PUT -> /api/reservas/{codigo}/confirmar */
     @PutMapping("/{codigo}/confirmar")
     @Operation(summary = "Confirmar una reserva",
-               description = "Solo una reserva PENDIENTE con hora estimada de llegada (RN-08, RN-09)")
+                description = "Solo una reserva PENDIENTE con hora estimada de llegada (RN-08, RN-09)")
     @ApiResponse(responseCode = "200", description = "Reserva confirmada")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
     @ApiResponse(responseCode = "409", description = "Transición inválida o falta la hora estimada de llegada")
     public ResponseEntity<ReservaDetalleResponse> confirmarReserva(@PathVariable String codigo) {
-
         Reserva reserva = confirmarReservaUseCase.ejecutar(new CodigoReserva(codigo));
         return ResponseEntity.ok(mapper.aDetalle(reserva));
     }
@@ -177,7 +157,7 @@ public class ReservaController {
     /** PUT -> /api/reservas/{codigo}/cancelar */
     @PutMapping("/{codigo}/cancelar")
     @Operation(summary = "Cancelar una reserva",
-               description = "Retención según la política congelada en la reserva (RN-13); libera las noches (RN-12)")
+                description = "Retención según la política congelada en la reserva (RN-13); libera las noches (RN-12)")
     @ApiResponse(responseCode = "200", description = "Reserva cancelada")
     @ApiResponse(responseCode = "400", description = "Falta el motivo o no cumple la longitud")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
@@ -197,12 +177,11 @@ public class ReservaController {
     /** PUT -> /api/reservas/{codigo}/registrar-llegada */
     @PutMapping("/{codigo}/registrar-llegada")
     @Operation(summary = "Registrar llegada del grupo (Check-in)",
-               description = "Transiciona la reserva a EN_CURSO y el apartamento a OCUPADO (RN-10, RN-11)")
+                description = "Transiciona la reserva a EN_CURSO y el apartamento a OCUPADO (RN-10, RN-11)")
     @ApiResponse(responseCode = "200", description = "Check-in exitoso")
     @ApiResponse(responseCode = "400", description = "El apartamento no está PREPARADO o la reserva no está CONFIRMADA")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
     public ResponseEntity<ReservaDetalleResponse> registrarLlegada(@PathVariable String codigo) {
-
         Reserva reserva = registrarLlegadaUseCase.ejecutar(
                 new CodigoReserva(codigo),
                 LocalDateTime.now()
@@ -213,7 +192,7 @@ public class ReservaController {
     /** PUT -> /api/reservas/{codigo}/registrar-salida */
     @PutMapping("/{codigo}/registrar-salida")
     @Operation(summary = "Registrar salida del grupo (Check-out)",
-               description = "Cierra la estancia, pasa la reserva a FINALIZADA y requiere saldo cero en folio (RN-17)")
+                description = "Cierra la estancia, pasa la reserva a FINALIZADA y requiere saldo cero en folio (RN-17)")
     @ApiResponse(responseCode = "200", description = "Check-out exitoso y folio cerrado")
     @ApiResponse(responseCode = "400", description = "El folio tiene saldo pendiente de pago sin autorización")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
@@ -234,13 +213,11 @@ public class ReservaController {
     /** PUT -> /api/reservas/{codigo}/no-show */
     @PutMapping("/{codigo}/no-show")
     @Operation(summary = "Declarar No-Show",
-               description = "Marca la reserva como NO_SHOW al superar el tiempo límite de llegada y libera la estancia")
+                description = "Marca la reserva como NO_SHOW al superar el tiempo límite de llegada y libera la estancia")
     @ApiResponse(responseCode = "200", description = "Reserva declarada como NO_SHOW")
     @ApiResponse(responseCode = "404", description = "No existe una reserva con ese código")
     public ResponseEntity<ReservaDetalleResponse> declararNoShow(@PathVariable String codigo) {
-
         Reserva reserva = declararNoShowUseCase.ejecutar(new CodigoReserva(codigo), LocalDateTime.now());
         return ResponseEntity.ok(mapper.aDetalle(reserva));
     }
-
 }

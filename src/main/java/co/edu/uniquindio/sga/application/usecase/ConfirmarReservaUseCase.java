@@ -5,6 +5,7 @@ import co.edu.uniquindio.sga.domain.entity.Reserva;
 import co.edu.uniquindio.sga.domain.repository.ReservaRepository;
 import co.edu.uniquindio.sga.domain.valueobject.CodigoReserva;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfirmarReservaUseCase {
 
     private final ReservaRepository reservaRepository;
+
+    /** Inyección de propiedad de negocio desde application.properties (evita valores quemados) */
+    @Value("${sga.reserva.plazo-confirmacion-horas:24}")
+    private int plazoConfirmacionHoras;
 
     public ConfirmarReservaUseCase(ReservaRepository reservaRepository) {
         this.reservaRepository = reservaRepository;
@@ -24,6 +29,9 @@ public class ConfirmarReservaUseCase {
         Reserva reserva = reservaRepository.obtenerPorCodigo(codigo)
                 .orElseThrow(() -> new ReservaNoEncontradaException(codigo));
 
+        // Aquí tienes disponible la variable 'plazoConfirmacionHoras' por si tu lógica 
+        // de negocio en el agregado o el caso de uso requiere validar el tiempo límite.
+        
         reserva.confirmar();
         reservaRepository.guardar(reserva);
         return reserva;
