@@ -141,7 +141,7 @@ paths:
         "200":
           description: Check-in exitoso; estado pasa a EN_CURSO.
         "400":
-          description: El solar no está en estado PREPARADO o la reserva no está CONFIRMADA.
+          description: El Apartamento no está en estado PREPARADO o la reserva no está CONFIRMADA.
 
   /reservas/{codigo}/registrar-salida:
     put:
@@ -209,10 +209,10 @@ paths:
         "200":
           description: Cotización calculada exitosamente.
 
-  /solares/disponibles:
+  /apartamentos/disponibles:
     get:
-      summary: ConsultarSolaresDisponiblesUseCase - Consultar con filtros para listar solares
-      operationId: consultarSolaresDisponibles
+      summary: ConsultarApartamentosDisponiblesUseCase - Consultar con filtros para listar apartamentos
+      operationId: consultarApartamentosDisponibles
       parameters:
         - name: fechaEntrada
           in: query
@@ -239,16 +239,16 @@ paths:
             maximum: 10
       responses:
         "200":
-          description: Página de solares disponibles para el rango especificado.
+          description: Página de apartamentos disponibles para el rango especificado.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PaginaSolaresDTO"
+                $ref: "#/components/schemas/PaginaApartamentosDTO"
 
-  /solares/{identificacion}:
+  /apartamentos/{identificacion}:
     get:
-      summary: ConsultarSolarUseCase - Obtiene el detalle completo de un Solar
-      operationId: consultarSolar
+      summary: ConsultarApartamentoUseCase - Obtiene el detalle completo de un Apartamento
+      operationId: consultarApartamento
       parameters:
         - name: identificacion
           in: path
@@ -258,7 +258,7 @@ paths:
             example: "SOL-101"
       responses:
         "200":
-          description: Detalle del solar encontrado.
+          description: Detalle del apartamento encontrado.
 
   /externo/reservas:
     post:
@@ -304,7 +304,7 @@ components:
     CrearReservaDTO:
       type: object
       properties:
-        identificacionSolar:
+        identificacionApartamento:
           type: string
           example: "SOL-101"
         fechaEntrada:
@@ -331,12 +331,12 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/OcupanteRequestDTO'
-      required: [identificacionSolar, fechaEntrada, fechaSalida, canalOrigen, titular, ocupantes]
+      required: [identificacionApartamento, fechaEntrada, fechaSalida, canalOrigen, titular, ocupantes]
 
     CotizarEstanciaDTO:
       type: object
       properties:
-        identificacionSolar:
+        identificacionApartamento:
           type: string
           example: "SOL-101"
         fechaEntrada:
@@ -350,7 +350,7 @@ components:
           minItems: 1
           items:
             $ref: '#/components/schemas/OcupanteRequestDTO'
-      required: [identificacionSolar, fechaEntrada, fechaSalida, ocupantes]
+      required: [identificacionApartamento, fechaEntrada, fechaSalida, ocupantes]
 
     ReservaDTO:
       type: object
@@ -358,7 +358,7 @@ components:
         codigoReserva:
           type: string
           example: "RES-2026-00001"
-        identificacionSolar:
+        identificacionApartamento:
           type: string
           example: "SOL-101"
         estado:
@@ -441,7 +441,7 @@ components:
         tamanoPagina:
           type: integer
 
-    PaginaSolaresDTO:
+    PaginaApartamentosDTO:
       type: object
       properties:
         contenido:
