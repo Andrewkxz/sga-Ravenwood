@@ -36,6 +36,11 @@ public class ApartamentoJpaRepository implements ApartamentoRepository {
     }
 
     @Override
+    public List<Apartamento> buscarTodos() {
+        return obtenerTodos();
+    }
+
+    @Override
     public void guardar(Apartamento apartamento) {
         dataRepository.save(mapper.toEntity(apartamento));
     }

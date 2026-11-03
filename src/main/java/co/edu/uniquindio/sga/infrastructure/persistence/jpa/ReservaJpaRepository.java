@@ -8,13 +8,12 @@ import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 import co.edu.uniquindio.sga.domain.valueobject.Periodo;
 import co.edu.uniquindio.sga.infrastructure.persistence.jpa.entity.ReservaEntity;
 import co.edu.uniquindio.sga.infrastructure.persistence.jpa.mapper.ReservaPersistenceMapper;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -60,20 +59,11 @@ public class ReservaJpaRepository implements ReservaRepository {
                 .toList();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int pagina, int tamano) {
         Pageable pageable = PageRequest.of(pagina, tamano);
         return dataRepository.findByEstado(estado, pageable)
-                .stream()
-                .map(mapper::toReservaDomain)
-                .toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int page, int size) {
-        return dataRepository.buscarPorEstadoPaginado(estado, PageRequest.of(page, size))
-                .getContent()
                 .stream()
                 .map(mapper::toReservaDomain)
                 .toList();
@@ -89,7 +79,7 @@ public class ReservaJpaRepository implements ReservaRepository {
     @Transactional(readOnly = true)
     public List<Reserva> buscarActivasPorApartamento(IdentificacionApartamento apartamento, Periodo periodo) {
         // Igual que la versión en memoria: trae las activas del apartamento y el servicio
-        // de disponibilidad revisa el solape de fechas. Filtrar por fechas en la consulta: Guía 11
+        // de disponibilidad revisa el solape de fechas.
         List<EstadoReserva> activas = Arrays.stream(EstadoReserva.values())
                 .filter(EstadoReserva::esActiva)
                 .toList();
