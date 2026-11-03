@@ -45,9 +45,10 @@ public class LiquidacionEstanciaService {
             
             Dinero subtotalNoche = tarifa.valorPorOcupanteNoche().multiplicarPor(facturables);
             
-            // RN-02: 2 mascotas gratis, la 3ra con cargo por noche
-            if (cantidadMascotas == 3) {
-                subtotalNoche = subtotalNoche.sumar(cargoMascota);
+            // RN-02: 2 mascotas gratis, a partir de la 3ra con cargo por noche
+            if (cantidadMascotas > 2) {
+                int mascotasConCargo = cantidadMascotas - 2;
+                subtotalNoche = subtotalNoche.sumar(cargoMascota.multiplicarPor(mascotasConCargo));
             }
 
             noches.add(new NocheLiquidada(noche, temporada.getId(), tarifa.valorPorOcupanteNoche(),
