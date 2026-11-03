@@ -20,6 +20,7 @@ public record ReservaDetalleResponse(
         OcupanteResponse titular,
         List<OcupanteResponse> ocupantes,
         int totalOcupantes,
+        int cantidadMascotas,
         long valorTotal,                    // pesos, sin decimales (3.4)
         String moneda,                      // "COP"
         String versionPoliticaCancelacion,  // la congelada en la reserva (RN-22)

@@ -44,6 +44,11 @@ public class Apartamento {
         this.activo = true;
     }
 
+    /** Un apartamento está disponible si está activo y no está fuera de servicio */
+    public boolean aceptaReservas(){
+        return activo && estadoOperativo != EstadoOperativo.FUERA_DE_SERVICIO;
+    }
+
     /** RN-02: la capacidad es un tope rígido, sin excepciones. Todos los ocupantes cuentan. */
     public boolean admite(int totalOcupantes) {
         return totalOcupantes <= capacidad;
@@ -51,7 +56,7 @@ public class Apartamento {
 
     /** 7.5 condición 3: solo un apartamento activo admite reservas nuevas. */
     public void verificarQueAceptaReservas() {
-        if (!activo) {
+        if (!aceptaReservas()) {
             throw new ReglaDominioException("El apartamento no está activo y no admite reservas.");
         }
     }

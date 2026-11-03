@@ -4,7 +4,9 @@ import co.edu.uniquindio.sga.domain.entity.Apartamento;
 import co.edu.uniquindio.sga.domain.repository.ApartamentoRepository;
 import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
@@ -23,5 +25,10 @@ public class ApartamentoRepositoryInMemory implements ApartamentoRepository {
     @Override
     public void guardar(Apartamento apartamento) {
         apartamentos.put(apartamento.getIdentificacion(), apartamento);
+    }
+
+    @Override
+    public List<Apartamento> buscarTodos() {
+    return new ArrayList<>(apartamentos.values());
     }
 }

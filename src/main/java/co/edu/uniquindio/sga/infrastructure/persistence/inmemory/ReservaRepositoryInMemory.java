@@ -45,4 +45,16 @@ public class ReservaRepositoryInMemory implements ReservaRepository {
     public void guardar(Reserva reserva) {
         reservas.put(reserva.getCodigo(), reserva);
     }
+
+    @Override
+    public List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int page, int size) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'buscarPorEstadoPaginado'");
+    }
+
+    @Override
+    public long contarPorEstado(EstadoReserva estado) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'contarPorEstado'");
+    }
 }

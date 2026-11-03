@@ -7,12 +7,13 @@ import co.edu.uniquindio.sga.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.sga.domain.valueobject.EstadoReserva;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /** Servicio de dominio (Guía 05) */
 public class OperacionEstanciaService {
 
     /** RN-08, RN-10 (en Reserva) y RN-11: el apartamento debe estar activo y PREPARADO. */
-    public void registrarLlegada(Reserva reserva, Apartamento apartamento, LocalDate fechaActual) {
+    public void registrarLlegada(Reserva reserva, Apartamento apartamento, LocalDateTime fechaActual) {
         verificarCorrespondencia(reserva, apartamento);
         if (!apartamento.puedeRecibirGrupo()) {
             throw new ReglaDominioException(

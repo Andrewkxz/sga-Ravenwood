@@ -9,7 +9,7 @@ import co.edu.uniquindio.sga.domain.repository.ReservaRepository;
 import co.edu.uniquindio.sga.domain.service.OperacionEstanciaService;
 import co.edu.uniquindio.sga.domain.valueobject.CodigoReserva;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +31,7 @@ public class RegistrarLlegadaUseCase {
     }
 
     @Transactional
-    public Reserva ejecutar(CodigoReserva codigo, LocalDate fechaActual) {
+    public Reserva ejecutar(CodigoReserva codigo, LocalDateTime fechaActual) {
         Reserva reserva = reservaRepository.obtenerPorCodigo(codigo)
                 .orElseThrow(() -> new ReservaNoEncontradaException(codigo));
 

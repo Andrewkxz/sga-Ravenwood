@@ -1,6 +1,7 @@
 package co.edu.uniquindio.sga.infrastructure.rest.mapper;
 
 import co.edu.uniquindio.sga.application.dto.request.CrearReservaRequest;
+import co.edu.uniquindio.sga.application.dto.request.ModificarReservaRequest;
 import co.edu.uniquindio.sga.application.dto.request.OcupanteRequest;
 import co.edu.uniquindio.sga.application.dto.response.OcupanteResponse;
 import co.edu.uniquindio.sga.application.dto.response.ReservaDetalleResponse;
@@ -32,6 +33,9 @@ public interface ReservaMapper {
      */
     Estancia aEstancia(CrearReservaRequest request);
 
+    /** Mapeo de fechas para ModificarReservaRequest */
+    Estancia aEstancia(ModificarReservaRequest request);
+
     /** Ocupante se construye con su constructor público (documento, nombreCompleto, fechaNacimiento) */
     @Mapping(target = "nombreCompleto", source = "nombre")
     Ocupante aOcupante(OcupanteRequest request);
@@ -51,6 +55,7 @@ public interface ReservaMapper {
     @Mapping(target = "noches", expression = "java(reserva.getEstancia().noches())")
     @Mapping(target = "horaEstimadaLlegada", source = "horaEstimadaLlegada.hora")
     @Mapping(target = "totalOcupantes", expression = "java(reserva.totalOcupantes())")
+    @Mapping(target = "cantidadMascotas", source = "cantidadMascotas")
     @Mapping(target = "valorTotal", source = "valorCongelado")
     @Mapping(target = "moneda", constant = "COP")
     @Mapping(target = "versionPoliticaCancelacion", source = "politicaCongelada.numero")

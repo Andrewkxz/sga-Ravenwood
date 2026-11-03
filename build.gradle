@@ -19,6 +19,9 @@ repositories {
 
 dependencies {
 	// --- Dependencias base del proyecto Spring Boot (Guía 03) ---
+
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	
 	implementation 'org.springframework.boot:spring-boot-h2console'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
