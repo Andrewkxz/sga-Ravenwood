@@ -3,7 +3,6 @@ package co.edu.uniquindio.sga.infrastructure.persistence.jpa;
 import co.edu.uniquindio.sga.domain.entity.Temporada;
 import co.edu.uniquindio.sga.domain.repository.TemporadaRepository;
 import co.edu.uniquindio.sga.domain.valueobject.IdTemporada;
-import co.edu.uniquindio.sga.infrastructure.persistence.jpa.entity.TemporadaEntity;
 import co.edu.uniquindio.sga.infrastructure.persistence.jpa.mapper.TemporadaPersistenceMapper;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
