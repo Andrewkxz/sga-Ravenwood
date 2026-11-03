@@ -25,6 +25,12 @@ public class ReservaRepositoryInMemory implements ReservaRepository {
                 .stream()
                 .filter(reserva -> reserva.getApartamento().equals(apartamento))
                 .filter(reserva -> reserva.getEstado().esActiva())
+                .filter(reserva -> {
+                    Periodo periodoReserva = new Periodo(
+                            reserva.getEstancia().fechaEntrada(),
+                            reserva.getEstancia().fechaSalida());
+                    return periodoReserva.seSolapaCon(periodo);
+                })
                 .toList();
     }
 
@@ -44,5 +50,23 @@ public class ReservaRepositoryInMemory implements ReservaRepository {
     @Override
     public void guardar(Reserva reserva) {
         reservas.put(reserva.getCodigo(), reserva);
+    }
+
+    @Override
+    public List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int page, int size) {
+        return reservas.values()
+                .stream()
+                .filter(reserva -> reserva.getEstado() == estado)
+                .skip((long) page * size)
+                .limit(size)
+                .toList();
+    }
+
+    @Override
+    public long contarPorEstado(EstadoReserva estado) {
+        return reservas.values()
+                .stream()
+                .filter(reserva -> reserva.getEstado() == estado)
+                .count();
     }
 }

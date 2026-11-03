@@ -41,6 +41,7 @@ public class CrearReservaUseCase {
     private final GeneradorCodigoReserva generadorCodigo;
     private final DisponibilidadApartamentoService disponibilidadService;
     private final LiquidacionEstanciaService liquidacionService;
+    private final Dinero cargoMascota;
     // L-13: configuración del alojamiento, nunca una constante
     private final TiempoPreparacion tiempoPreparacion;
 
@@ -52,6 +53,7 @@ public class CrearReservaUseCase {
                                GeneradorCodigoReserva generadorCodigo,
                                DisponibilidadApartamentoService disponibilidadService,
                                LiquidacionEstanciaService liquidacionService,
+                               Dinero cargoMascota,
                                TiempoPreparacion tiempoPreparacion) {
         this.reservaRepository = reservaRepository;
         this.apartamentoRepository = apartamentoRepository;
@@ -61,6 +63,7 @@ public class CrearReservaUseCase {
         this.generadorCodigo = generadorCodigo;
         this.disponibilidadService = disponibilidadService;
         this.liquidacionService = liquidacionService;
+        this.cargoMascota = cargoMascota;
         this.tiempoPreparacion = tiempoPreparacion;
     }
 
@@ -68,7 +71,7 @@ public class CrearReservaUseCase {
     @Transactional
     public Reserva ejecutar(IdentificacionApartamento apartamentoId, Estancia estancia,
                             HoraEstimadaLlegada horaEstimadaLlegada,
-                            Ocupante titular, List<Ocupante> ocupantes,
+                            Ocupante titular, List<Ocupante> ocupantes, int cantidadMascotas,
                             CanalOrigen canalOrigen, LocalDate fechaActual) {
 
         Apartamento apartamento = apartamentoRepository.obtenerPorIdentificacion(apartamentoId)
@@ -82,7 +85,7 @@ public class CrearReservaUseCase {
 
         // RN-05, RN-06: el caso de uso trae las temporadas; el servicio de dominio liquida
         Dinero valor = liquidacionService
-                .liquidar(apartamento, estancia, ocupantes, temporadaRepository.buscarTodas())
+                .liquidar(apartamento, estancia, ocupantes, cantidadMascotas, cargoMascota, temporadaRepository.buscarTodas())
                 .total();
 
         PoliticaCancelacion politicaVigente = politicaRepository.obtenerVigenteEn(fechaActual)
@@ -92,7 +95,7 @@ public class CrearReservaUseCase {
 
         // RN-02, RN-04 y RN-22 se verifican dentro de Reserva.crear(...)
         Reserva reserva = Reserva.crear(codigo, apartamentoId, apartamento.getCapacidad(), estancia,
-                titular, ocupantes, canalOrigen, valor, politicaVigente.getVersion(), fechaActual);
+                titular, ocupantes, cantidadMascotas, canalOrigen, valor, politicaVigente.getVersion(), fechaActual);
 
         if (horaEstimadaLlegada != null) {
             reserva.registrarHoraEstimadaLlegada(horaEstimadaLlegada);

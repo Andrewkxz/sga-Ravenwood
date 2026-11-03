@@ -45,6 +45,9 @@ public class ReservaEntity {
     @Column(name = "documento_titular", nullable = false, length = 15)
     private String documentoTitular;
 
+    @Column(name = "cantidad_mascotas", nullable = false)
+    private int cantidadMascotas;
+
     @ElementCollection
     @CollectionTable(name = "reserva_ocupantes", //Creaacion de tabla
                     joinColumns = @JoinColumn(name = "reserva_id")) //Relacion llave foranea

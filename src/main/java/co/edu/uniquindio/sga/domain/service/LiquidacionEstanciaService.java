@@ -29,7 +29,8 @@ public class LiquidacionEstanciaService {
     }
 
     public LiquidacionEstancia liquidar(Apartamento apartamento, Estancia estancia,
-                                        List<Ocupante> ocupantes, List<Temporada> temporadas) {
+                                        List<Ocupante> ocupantes, int cantidadMascotas,
+                                        Dinero cargoMascota, List<Temporada> temporadas) {
         int facturables = (int) ocupantes.stream()
                 .filter(ocupante -> ocupante.esFacturableEn(estancia, umbral))
                 .count();
@@ -41,9 +42,17 @@ public class LiquidacionEstanciaService {
             Tarifa tarifa = apartamento.tarifaEn(temporada.getId())
                     .orElseThrow(() -> new ReglaDominioException(
                             "El apartamento no tiene tarifa definida para la temporada " + temporada.getNombre() + "."));
-            Dinero subtotal = tarifa.valorPorOcupanteNoche().multiplicarPor(facturables);
+            
+            Dinero subtotalNoche = tarifa.valorPorOcupanteNoche().multiplicarPor(facturables);
+            
+            // RN-02: 2 mascotas gratis, a partir de la 3ra con cargo por noche
+            if (cantidadMascotas > 2) {
+                int mascotasConCargo = cantidadMascotas - 2;
+                subtotalNoche = subtotalNoche.sumar(cargoMascota.multiplicarPor(mascotasConCargo));
+            }
+
             noches.add(new NocheLiquidada(noche, temporada.getId(), tarifa.valorPorOcupanteNoche(),
-                    facturables, subtotal));
+                    facturables, subtotalNoche));
         }
         return new LiquidacionEstancia(noches);
     }

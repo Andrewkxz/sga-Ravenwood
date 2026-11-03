@@ -6,11 +6,11 @@ import co.edu.uniquindio.sga.domain.exception.ReglaDominioException;
 import co.edu.uniquindio.sga.domain.repository.BloqueoRepository;
 import co.edu.uniquindio.sga.domain.repository.ReservaRepository;
 import co.edu.uniquindio.sga.domain.valueobject.Estancia;
+import co.edu.uniquindio.sga.domain.valueobject.HorarioAlojamiento;
 import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 import co.edu.uniquindio.sga.domain.valueobject.Periodo;
 import co.edu.uniquindio.sga.domain.valueobject.TiempoPreparacion;
 
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 /** Servicio de dominio (Guía 05) */
@@ -18,10 +18,12 @@ public class DisponibilidadApartamentoService {
 
     private final ReservaRepository reservaRepository;
     private final BloqueoRepository bloqueoRepository;
+    private final HorarioAlojamiento horario;
 
-    public DisponibilidadApartamentoService(ReservaRepository reservaRepository, BloqueoRepository bloqueoRepository) {
+    public DisponibilidadApartamentoService(ReservaRepository reservaRepository, BloqueoRepository bloqueoRepository, HorarioAlojamiento horario) {
         this.reservaRepository = reservaRepository;
         this.bloqueoRepository = bloqueoRepository;
+        this.horario = horario;
     }
 
     public boolean estaDisponible(IdentificacionApartamento apartamento, Estancia estancia, TiempoPreparacion preparacion) {
@@ -64,19 +66,18 @@ public class DisponibilidadApartamentoService {
     // RN-20: entre la salida de un grupo y la entrada del siguiente debe respetarse
     // el tiempo de preparación configurado
     private boolean violaTiempoPreparacion(Estancia nueva, Estancia otra, TiempoPreparacion preparacion) {
-        long diasPreparacion = Math.ceilDiv(preparacion.horas(), 24);
-        if (diasPreparacion == 0) {
+        if (preparacion.horas() == 0) {
             return false;
         }
-        if (!nueva.fechaEntrada().isBefore(otra.fechaSalida())) {
-            long brecha = ChronoUnit.DAYS.between(otra.fechaSalida(), nueva.fechaEntrada());
-            if (brecha < diasPreparacion) {
-                return true;
-            }
-        }
-        if (!otra.fechaEntrada().isBefore(nueva.fechaSalida())) {
-            long brecha = ChronoUnit.DAYS.between(nueva.fechaSalida(), otra.fechaEntrada());
-            if (brecha < diasPreparacion) {
+
+        // Si una reserva entra el mismo día que otra sale, calculamos la brecha de horas exactas
+        if (otra.fechaSalida().isEqual(nueva.fechaEntrada()) || nueva.fechaSalida().isEqual(otra.fechaEntrada())) {
+            long horasDisponibles = java.time.Duration.between(
+                    horario.horaSalida(),
+                    horario.horaEntrada()
+            ).toHours();
+
+            if (horasDisponibles < preparacion.horas()) {
                 return true;
             }
         }

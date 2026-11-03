@@ -29,6 +29,7 @@ public class Reserva {
     private IdentificadorExterno identificadorExterno;
     private final Ocupante titular;
     private List<Ocupante> ocupantes;
+    private final int cantidadMascotas;
     private HoraEstimadaLlegada horaEstimadaLlegada;
     private Dinero valorCongelado;
     private VersionPolitica politicaCongelada;
@@ -41,6 +42,7 @@ public class Reserva {
                      CanalOrigen canalOrigen,
                      Ocupante titular,
                      List<Ocupante> ocupantes,
+                     int cantidadMascotas,
                      Dinero valorCongelado,
                      VersionPolitica politicaCongelada,
                      LocalDate fechaCreacion) {
@@ -51,6 +53,7 @@ public class Reserva {
         this.canalOrigen = canalOrigen;
         this.titular = titular;
         this.ocupantes = ocupantes;
+        this.cantidadMascotas = cantidadMascotas;
         this.valorCongelado = valorCongelado;
         this.politicaCongelada = politicaCongelada;
         this.fechaCreacion = fechaCreacion;
@@ -62,6 +65,7 @@ public class Reserva {
                                  Estancia estancia,
                                  Ocupante titular,
                                  List<Ocupante> ocupantes,
+                                 int cantidadMascotas,
                                  CanalOrigen canalOrigen,
                                  Dinero valorCongelado,
                                  VersionPolitica politicaCongelada,
@@ -80,6 +84,9 @@ public class Reserva {
         }
         if (ocupantes == null || ocupantes.isEmpty()) {
             throw new ReglaDominioException("La reserva debe tener al menos un ocupante.");
+        }
+        if (cantidadMascotas < 0 || cantidadMascotas > 3) {
+            throw new ReglaDominioException("El número de mascotas permitido es de 0 a 3.");
         }
         if (canalOrigen == null) {
             throw new ReglaDominioException("La reserva debe indicar el canal de origen.");
@@ -114,8 +121,9 @@ public class Reserva {
 
         // RN-22: el valor y la política quedan congelados al crear la reserva
         return new Reserva(codigo, apartamento, estancia, canalOrigen, titular,
-                List.copyOf(ocupantes), valorCongelado, politicaCongelada, fechaActual);
-    }
+                List.copyOf(ocupantes), cantidadMascotas, valorCongelado, politicaCongelada, fechaActual);
+        }
+
 
     //Reconstruye una reserva ya guardada anteriormente.NO hace validaciones de creacion
     public static Reserva recontruir(CodigoReserva codigo,
@@ -125,6 +133,7 @@ public class Reserva {
                                      CanalOrigen canalOrigen,
                                      Ocupante titular,
                                      List<Ocupante> ocupantes,
+                                     int cantidadMascotas,
                                      HoraEstimadaLlegada horaEstimadaLlegada,
                                      Dinero valorCongelado,
                                      VersionPolitica politicaCongelada,
@@ -132,12 +141,16 @@ public class Reserva {
                                      String motivoCancelacion){
 
         Reserva reserva = new Reserva(codigo,apartamento,estancia,canalOrigen,
-                titular,List.copyOf(ocupantes),valorCongelado,politicaCongelada,fechaCreacion);
+                titular,List.copyOf(ocupantes), cantidadMascotas, valorCongelado,politicaCongelada,fechaCreacion);
 
         reserva.estado = estado;
         reserva.horaEstimadaLlegada = horaEstimadaLlegada;
         reserva.motivoCancelacion = motivoCancelacion;
         return reserva;
+    }
+
+    public int getCantidadMascotas() {
+        return cantidadMascotas;
     }
 
     public int totalOcupantes() {
@@ -186,10 +199,17 @@ public class Reserva {
      * la fecha de entrada. La verificación del estado operativo del apartamento no va aquí:
      * es una precondición externa que resuelve el servicio de dominio correspondiente.
      */
-    public void registrarLlegada(LocalDate fechaActual) {
-        if (fechaActual.isBefore(estancia.fechaEntrada())) {
+    public void registrarLlegada(LocalDateTime fechaActual) {
+        if (fechaActual.toLocalDate().isBefore(estancia.fechaEntrada())) {
             throw new ReglaDominioException("No se puede registrar la llegada antes de la fecha de entrada.");
         }
+        
+        // Bloqueo estricto a partir de las 20:01
+        if (fechaActual.toLocalDate().isEqual(estancia.fechaEntrada()) &&
+            fechaActual.toLocalTime().isAfter(java.time.LocalTime.of(20, 0))) {
+            throw new ReglaDominioException("A partir de las 20:01 la reserva transita a No-Show. No se permite check-in.");
+        }
+        
         transitarA(EstadoReserva.EN_CURSO);
     }
 

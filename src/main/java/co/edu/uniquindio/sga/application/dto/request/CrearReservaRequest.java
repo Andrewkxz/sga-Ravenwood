@@ -2,6 +2,8 @@ package co.edu.uniquindio.sga.application.dto.request;
 
 import co.edu.uniquindio.sga.domain.valueobject.CanalOrigen;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +27,10 @@ public record CrearReservaRequest(
         // Un valor desconocido lo rechaza Jackson con 400 (Guía 07, 5.5)
         @NotNull(message = "El canal de origen es obligatorio")
         CanalOrigen canalOrigen,
+
+        @Min(value = 0, message = "La cantidad de mascotas no puede ser negativa")
+        @Max(value = 3, message = "El máximo de mascotas permitido es 3")
+        int cantidadMascotas,
 
         // Opcional al crear; obligatoria para confirmar (RN-09)
         LocalTime horaEstimadaLlegada,

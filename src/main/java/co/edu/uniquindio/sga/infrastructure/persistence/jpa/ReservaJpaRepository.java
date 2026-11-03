@@ -8,6 +8,7 @@ import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 import co.edu.uniquindio.sga.domain.valueobject.Periodo;
 import co.edu.uniquindio.sga.infrastructure.persistence.jpa.entity.ReservaEntity;
 import co.edu.uniquindio.sga.infrastructure.persistence.jpa.mapper.ReservaPersistenceMapper;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -66,6 +67,22 @@ public class ReservaJpaRepository implements ReservaRepository {
                 .stream()
                 .map(mapper::toReservaDomain)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int page, int size) {
+        return dataRepository.buscarPorEstadoPaginado(estado, PageRequest.of(page, size))
+                .getContent()
+                .stream()
+                .map(mapper::toReservaDomain)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long contarPorEstado(EstadoReserva estado) {
+        return dataRepository.countByEstado(estado);
     }
 
     @Override

@@ -20,6 +20,7 @@ public interface ReservaPersistenceMapper {
     @Mapping(target = "codigo", source = "codigo.valor")
     @Mapping(target = "apartamentoId", source = "apartamento.valor")
     @Mapping(target = "documentoTitular", source = "titular.documento.valor")
+    @Mapping(target = "cantidadMascotas", source = "cantidadMascotas")
     @Mapping(target = "horaEstimadaLlegada", source = "horaEstimadaLlegada.hora")
     @Mapping(target = "valorCongelado", source = "valorCongelado.valor")
     ReservaEntity toReservaEntity(Reserva reserva);
@@ -58,6 +59,7 @@ public interface ReservaPersistenceMapper {
                 reservaEntity.getEstado(),
                 reservaEntity.getCanalOrigen(),
                 titular, ocupantes,
+                reservaEntity.getCantidadMascotas(),
                 new HoraEstimadaLlegada(reservaEntity.getHoraEstimadaLlegada()),
                 new Dinero(reservaEntity.getValorCongelado()),
                 new VersionPolitica(reservaEntity.getPoliticaCongelada().numero(), reservaEntity.getPoliticaCongelada().vigenteDesde()),

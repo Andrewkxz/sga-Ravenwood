@@ -15,6 +15,11 @@ public interface ReservaRepository {
     List<Reserva> buscarActivasPorApartamento(IdentificacionApartamento apartamento, Periodo periodo);
     Optional<Reserva> obtenerPorCodigo(CodigoReserva codigo);
     List<Reserva> buscarPorEstado(EstadoReserva estado);
+    
+    /** Consulta paginada por estado (Guía 11) */
+    List<Reserva> buscarPorEstadoPaginado(EstadoReserva estado, int page, int size);
+    long contarPorEstado(EstadoReserva estado);
 
     void guardar(Reserva reserva);
+
 }

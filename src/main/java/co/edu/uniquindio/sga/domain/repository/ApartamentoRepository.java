@@ -14,4 +14,7 @@ public interface ApartamentoRepository {
     List<Apartamento> obtenerTodos();
 
     void guardar(Apartamento apartamento);
+
+    // Método necesario para filtrar el catálogo disponible
+    List<Apartamento> buscarTodos();
 }

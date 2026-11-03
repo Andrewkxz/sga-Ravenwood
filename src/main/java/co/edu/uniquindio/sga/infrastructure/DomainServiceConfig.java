@@ -6,6 +6,7 @@ import co.edu.uniquindio.sga.domain.service.DisponibilidadApartamentoService;
 import co.edu.uniquindio.sga.domain.service.LiquidacionEstanciaService;
 import co.edu.uniquindio.sga.domain.service.OperacionEstanciaService;
 import co.edu.uniquindio.sga.domain.service.RetencionService;
+import co.edu.uniquindio.sga.domain.valueobject.Dinero;
 import co.edu.uniquindio.sga.domain.valueobject.HoraLimiteNoShow;
 import co.edu.uniquindio.sga.domain.valueobject.HorarioAlojamiento;
 import co.edu.uniquindio.sga.domain.valueobject.TiempoPreparacion;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 
 /** Servicios de dominio y parámetros del alojamiento registrados como beans (Guía 09, Parte 3) */
@@ -46,11 +48,17 @@ public class DomainServiceConfig {
         return new HoraLimiteNoShow(LocalTime.parse(hora));
     }
 
+    @Bean
+    public Dinero cargoMascota(
+            @Value("${sga.alojamiento.cargo-tercera-mascota}") long valor) {
+        return new Dinero(BigDecimal.valueOf(valor));
+    }
+
     /** Servicios de dominio: siguen siendo Java puro, Spring los crea aquí sin que el dominio lo sepa */
     @Bean
     public DisponibilidadApartamentoService disponibilidadApartamentoService(
-            ReservaRepository reservaRepository, BloqueoRepository bloqueoRepository) {
-        return new DisponibilidadApartamentoService(reservaRepository, bloqueoRepository);
+            ReservaRepository reservaRepository, BloqueoRepository bloqueoRepository, HorarioAlojamiento horario) {
+        return new DisponibilidadApartamentoService(reservaRepository, bloqueoRepository, horario);
     }
 
     @Bean

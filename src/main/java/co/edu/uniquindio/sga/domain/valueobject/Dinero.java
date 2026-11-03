@@ -6,7 +6,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 // Prohibido float/double para dinero: toda cifra monetaria del dominio pasa por este objeto de valor
-/** Objeto de valor (Guía 04) */
+// Admite valores negativos para representar saldos a favor (Retroalimentación de la Entrega 1)
+/** Objeto de valor para representar dinero en pesos colombianos (COP) (Guía 04) */
 public record Dinero(BigDecimal valor) {
 
     public static final Dinero CERO = new Dinero(BigDecimal.ZERO);
@@ -15,10 +16,7 @@ public record Dinero(BigDecimal valor) {
         if (valor == null) {
             throw new ReglaDominioException("El valor monetario es obligatorio.");
         }
-        if (valor.signum() < 0) {
-            throw new ReglaDominioException("El valor monetario no puede ser negativo.");
-        }
-        valor = valor.setScale(2, RoundingMode.HALF_UP);
+        valor = valor.setScale(0, RoundingMode.HALF_UP);
     }
 
     public Dinero sumar(Dinero otro) {
@@ -39,5 +37,9 @@ public record Dinero(BigDecimal valor) {
 
     public boolean esMayorQue(Dinero otro) {
         return valor.compareTo(otro.valor) > 0;
+    }
+
+    public boolean esNegativo() {
+        return valor.signum() < 0;
     }
 }

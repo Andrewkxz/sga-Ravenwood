@@ -31,4 +31,9 @@ public class ApartamentoRepositoryInMemory implements ApartamentoRepository {
     public void guardar(Apartamento apartamento) {
         apartamentos.put(apartamento.getIdentificacion(), apartamento);
     }
+
+    @Override
+    public List<Apartamento> buscarTodos() {
+    return new ArrayList<>(apartamentos.values());
+    }
 }
