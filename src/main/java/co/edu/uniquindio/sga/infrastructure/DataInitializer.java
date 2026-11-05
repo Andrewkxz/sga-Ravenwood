@@ -7,7 +7,11 @@ import co.edu.uniquindio.sga.domain.valueobject.IdentificacionApartamento;
 import co.edu.uniquindio.sga.domain.valueobject.IdTemporada;
 import co.edu.uniquindio.sga.domain.valueobject.Periodo;
 import co.edu.uniquindio.sga.infrastructure.persistence.jpa.TemporadaJpaRepository;
+import co.edu.uniquindio.sga.infrastructure.persistence.jpa.UsuarioJpaDataRepository;
+import co.edu.uniquindio.sga.infrastructure.persistence.jpa.entity.UsuarioEntity;
+
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -17,12 +21,19 @@ public class DataInitializer implements CommandLineRunner {
 
     private final ApartamentoRepository apartamentoRepository;
     private final TemporadaJpaRepository temporadaRepository;
+    private final PasswordEncoder passwordEncoder; 
+    private final UsuarioJpaDataRepository usuarioRepository;
 
+    // CONSTRUCTOR CORREGIDO: Se inyectan las 4 dependencias
     public DataInitializer(
             ApartamentoRepository apartamentoRepository,
-            TemporadaJpaRepository temporadaRepository) {
+            TemporadaJpaRepository temporadaRepository,
+            PasswordEncoder passwordEncoder,
+            UsuarioJpaDataRepository usuarioRepository) {
         this.apartamentoRepository = apartamentoRepository;
         this.temporadaRepository = temporadaRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
@@ -58,6 +69,17 @@ public class DataInitializer implements CommandLineRunner {
             temporadaRepository.guardar(temporadaRegular);
         }
 
-        System.out.println(">>> Datos de prueba cargados automáticamente en H2 (Apartamentos y Temporadas) <<<");
+        // 3. Cargar Usuario Administrador de prueba
+        if (usuarioRepository.findByCorreo("admin@sga.com").isEmpty()) {
+            UsuarioEntity admin = new UsuarioEntity(
+                "admin@sga.com",
+                passwordEncoder.encode("123456"), // Contraseña cifrada con BCrypt
+                "ADMIN"
+            );
+            usuarioRepository.save(admin);
+            System.out.println(">>> Usuario administrador sembrado con éxito (admin@sga.com / 123456) <<<");
+        }
+
+        System.out.println(">>> Datos de prueba cargados automáticamente en H2 (Apartamentos, Temporadas y Usuario Admin) <<<");
     }
 }
